@@ -1,0 +1,5 @@
+build/
+ext/
+NetworkTrainer/
+imageData/
+contrib/
