@@ -1,6 +1,6 @@
 #include "Player.h"
 
-#include "Application.h"
+#include "../Application.h"
 
 Player::Player()
     : m_sm( *this )

@@ -1,13 +1,14 @@
-#ifndef STATEAPPROACH_H
-#define STATEAPPROACH_H
+#ifndef STATEATTACK_H
+#define STATEATTACK_H
 
 #include "State.h"
-#include "../Player.h"
+#include "Player.h"
 
-class StateApproach : public State<Player>
+class StateAttack : public State<Player>
 {
 public:
-    StateApproach( Player& owner, StateMachine<Player>& stateMachine );
+    StateAttack( Player& owner, StateMachine<Player>& stateMachine );
+    ~StateAttack();
 
     void Enter() override;
     void Update( std::chrono::duration<double> diff ) override;
@@ -22,4 +23,4 @@ private:
     bool m_hasFinished;
 };
 
-#endif // !STATEAPPROACH_H
+#endif // !STATEATTACK_H

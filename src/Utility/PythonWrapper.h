@@ -3,7 +3,7 @@
 
 #include <Python.h>
 #include <opencv2/highgui/highgui.hpp>
-#include <D:\Anaconda\Lib\site-packages\numpy\core\include\numpy\arrayobject.h>
+#include <arrayobject.h>
 
 // Python 3.5 C API Wrapper
 class PythonWrapper

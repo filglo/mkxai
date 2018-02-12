@@ -5,7 +5,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include "NeuralNetwork.h"
 #include "PythonWrapper.h"
-#include "States\State.h"
+#include "State.h"
 
 class ImageProcessor
 {

@@ -12,7 +12,7 @@ ScreenCapture::ScreenCapture( unsigned int frameWidth, unsigned int frameHeight 
     m_hWnd = ::FindWindow(NULL, "MK10");
     if( m_hWnd == NULL )
     {
-        throw std::runtime_error( "Cannot find game window./n" );
+        throw std::runtime_error( "Cannot find game window.\n" );
     }
     GetClientRect( m_hWnd, &screenRect );
     m_windowWidth = screenRect.right - screenRect.left;
