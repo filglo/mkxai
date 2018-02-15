@@ -6,7 +6,7 @@ PythonWrapper::PythonWrapper()
 
     // Initialize once
     Py_Initialize();
-    pName = PyUnicode_DecodeFSDefault( "tfDetection" );
+    pName = PyUnicode_DecodeFSDefault( "../../python/tfDetection" );
     /* Error checking of pName left out */
 
     m_pModule = PyImport_Import( pName );
