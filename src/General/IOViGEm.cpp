@@ -1,9 +1,9 @@
-#include "IOViGEm.h"
+#include "IOVigem.h"
 
 #include <vector>
 #include "Keycodes.h"
 
-IOViGEm::IOViGEm()
+IOVigem::IOVigem()
     : m_report( {0} )
 {
     if( !VIGEM_SUCCESS( vigem_init() ) )
@@ -19,13 +19,13 @@ IOViGEm::IOViGEm()
     }
 }
 
-IOViGEm::~IOViGEm()
+IOVigem::~IOVigem()
 {
     vigem_target_unplug( &m_x360 );
     vigem_shutdown();
 }
 
-void IOViGEm::ProcessInput( int key )
+void IOVigem::ProcessInput( int key )
 {
     if( key < 4 )
     {
@@ -44,19 +44,19 @@ void IOViGEm::ProcessInput( int key )
 }
 
 // Detects if key was pressed between function executions
-bool IOViGEm::WasKeyPressed( int key )
+bool IOVigem::WasKeyPressed( int key )
 {
     // pure virtual gamepad
     return false;
 }
 
-void IOViGEm::ReleaseAllKeys()
+void IOVigem::ReleaseAllKeys()
 {
     SetOutput( 0 );
     m_releaseTimers.clear();
 }
 
-void IOViGEm::Update( std::chrono::duration<double> timeDiff )
+void IOVigem::Update( std::chrono::duration<double> timeDiff )
 {
     bool released = false;
     std::vector<int> keys;
@@ -85,17 +85,17 @@ void IOViGEm::Update( std::chrono::duration<double> timeDiff )
     }
 }
 
-void IOViGEm::HoldKey( int key, std::chrono::duration<double> duration )
+void IOVigem::HoldKey( int key, std::chrono::duration<double> duration )
 {
     m_releaseTimers[key] = duration;
 }
 
-void IOViGEm::PressKey( int key )
+void IOVigem::PressKey( int key )
 {
     m_releaseTimers[key] = std::chrono::duration<double>(0.1);
 }
 
-void IOViGEm::ReleaseKey( int key )
+void IOVigem::ReleaseKey( int key )
 {
     if( m_releaseTimers.count( key ) )
     {
@@ -103,7 +103,7 @@ void IOViGEm::ReleaseKey( int key )
     }
 }
 
-void IOViGEm::SetOutput( int key )
+void IOVigem::SetOutput( int key )
 {
     switch( key )
     {

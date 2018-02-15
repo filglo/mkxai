@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 set(CMAKE_SUPPRESS_REGENERATION true)
 set(CMAKE_CONFIGURATION_TYPES Debug Release)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHc /std:c++latest")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHc /std:c++latest /W3")
 
 project(MKXAIProject VERSION 0.1.0)
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
@@ -20,7 +20,7 @@ file(
     "${_src_root_path}/*.h*"
 )
 
-include_directories(${CMAKE_SOURCE_DIR}/src/General ${CMAKE_SOURCE_DIR}/src/Player ${CMAKE_SOURCE_DIR}/src/Utility D:/Anaconda/include ${CMAKE_SOURCE_DIR}/contrib D:/repos/vigem/ViGEmUM D:/repos/vigem/Common $ENV{OPENCV_DIR}/../../include D:/repos/NNP/NNProject/contrib/tinyxml2 D:/Anaconda/Lib/site-packages/numpy/core/include/numpy)
+include_directories(${CMAKE_SOURCE_DIR}/src/General ${CMAKE_SOURCE_DIR}/src/Player ${CMAKE_SOURCE_DIR}/src/Utility D:/Anaconda/include ${CMAKE_SOURCE_DIR}/contrib D:/repos/vigem/ViGEmUM D:/repos/vigem/Common $ENV{OPENCV_DIR}/../../include D:/Anaconda/Lib/site-packages/numpy/core/include/numpy)
 link_directories(D:/Anaconda/pkgs/python-3.5.2-0/libs D:/repos/vigem/x64 $ENV{OPENCV_DIR}/lib )
 
 add_executable(Engine ${_source_list})

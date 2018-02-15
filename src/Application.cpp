@@ -17,6 +17,7 @@ Application::Application()
     m_dispatcher.connect( &m_imageProcessor, &ImageProcessor::GetHealthValues, m_player.m_GetPlayersHealth );
     m_dispatcher.connect( &m_imageProcessor, &ImageProcessor::GetDistance, m_player.m_GetDistance );
     m_dispatcher.connect( &m_imageProcessor, &ImageProcessor::GetSuggestedState, m_player.m_GetSuggestedState );
+    m_dispatcher.connect( &m_pyWrapper, &PythonWrapper::Eval, m_imageProcessor.m_EvalNetwork );
 
     posA.resize( 2 );
     posB.resize( 2 );
@@ -90,10 +91,13 @@ bool Application::ProcessUserInput()
         {
             m_ioGamepad.ProcessInput( Keycodes::GPKEY::UP );
         }
-        else if( m_ioKeyboard.WasKeyPressed( Keycodes::KBKEY::S ) )
+    }
+    else
+    {
+        if( m_ioKeyboard.WasKeyPressed( Keycodes::KBKEY::S ) )
         {
             // not working?
-            if( m_player.GetState().compare("Attack") == 0 )
+            if( m_player.GetState().compare( "Attack" ) == 0 )
             {
                 m_player.SetState( StateMachine<Player>::STATE::APPROACH );
             }
@@ -154,9 +158,8 @@ void Application::Render()
 
 void Application::SaveFrame()
 {
-    char buffer[50];
     static int imgNum = 0;
     auto path = "D:/repos/NNP/NNProject/imageData/else/";
-    cv::imwrite( std::string( path ) + itoa( imgNum, buffer, 10 ) + std::string( ".bmp" ), m_matBitmap );
+    cv::imwrite( std::string( path ) + std::to_string( imgNum ) + std::string( ".bmp" ), m_matBitmap );
     imgNum++;
 }

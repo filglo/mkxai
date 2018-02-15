@@ -8,11 +8,11 @@
 #include <ViGEmUM.h>
 #include "IOInterface.h"
 
-class IOViGEm : public IOInterface
+class IOVigem : public IOInterface
 {
 public:
-    IOViGEm();
-    ~IOViGEm();
+    IOVigem();
+    ~IOVigem();
 
     void ProcessInput( int key ) override;
     bool WasKeyPressed( int key ) override;

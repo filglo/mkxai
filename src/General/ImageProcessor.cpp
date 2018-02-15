@@ -7,10 +7,9 @@ ImageProcessor::ImageProcessor()
     , m_stateUpdated( false )
     , m_positionUpdated( false )
     , m_healthUpdated( false )
-    , m_frame( 720, 1280, CV_8UC4 )
+    , m_frame( 720, 1280, CV_8UC3 )
 {
     m_pos.resize( 4 );
-    m_network.LoadNetwork( "D:/repos/NNP/NNProject/models/" );
 }
 
 void ImageProcessor::UpdateHealthValues()
@@ -52,11 +51,24 @@ void ImageProcessor::UpdatePosition()
 {
     if( m_positionUpdated )
         return;
-    auto output = m_network.Predict( m_frame, 1.0 );
+    std::stringstream ss;
+    if( m_frame.channels() == 4 )
+    {
+        cv::cvtColor( m_frame, m_frame, CV_RGBA2RGB );
+    }
+    if( m_frame.rows != 720 || m_frame.cols != 1280 || m_frame.channels() != 3 || m_frame.depth() != CV_8U )
+    {
+        ss << m_frame.rows << " " << m_frame.cols << " " << m_frame.channels() << " " << m_frame.depth() << std::endl;
+        throw std::logic_error( "Invalid mat size\n" + ss.str() );
+    }
+    int a = 0;// = m_network.Predict( m_frame );
+    m_EvalNetwork( a, m_frame );
+    auto output = std::vector<float>( 4, 0.5 );
     for( int i = 0; i < m_pos.size(); ++i )
     {
         m_pos[i] = output[i];
     }
+    m_pos[0] = a;
     m_positionUpdated = true;
 }
 

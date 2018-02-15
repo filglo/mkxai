@@ -9,7 +9,8 @@
 #include "Player.h"
 #include "ImageProcessor.h"
 #include "IOKeyboard.h"
-#include "IOViGEm.h"
+#include "IOVigem.h"
+#include "PythonWrapper.h"
 
 class Application
 {
@@ -31,9 +32,10 @@ private:
 #if MOCK_GAMEPAD_IO
     IODummyInterface m_ioGamepad;
 #else
-    IOViGEm m_ioGamepad;
+    IOVigem m_ioGamepad;
 #endif
     ImageProcessor m_imageProcessor;
+    PythonWrapper m_pyWrapper;
     Player m_player;
     cv::Mat m_matBitmap;
     std::chrono::duration<double> m_timeCount;
