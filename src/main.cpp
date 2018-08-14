@@ -9,7 +9,7 @@ int main()
     }
     catch( std::exception& e )
     {
-        OutputDebugString( e.what() );
+        OutputDebugString( std::string(e.what() + std::string("Unhandled exception in main")).c_str() );
     }
 
     return 0;

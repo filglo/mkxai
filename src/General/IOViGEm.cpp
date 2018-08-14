@@ -27,7 +27,7 @@ IOVigem::~IOVigem()
 
 void IOVigem::ProcessInput( int key )
 {
-    if( key < 4 )
+    if( key < 4 || key == 20 )
     {
         PressKey( key );
     }
@@ -130,6 +130,9 @@ void IOVigem::SetOutput( int key )
         break;
     case Keycodes::GPKEY::UP:
         m_report.wButtons += XUSB_GAMEPAD_DPAD_UP;
+        break;
+    case Keycodes::GPKEY::SELECT:
+        m_report.wButtons += XUSB_GAMEPAD_BACK;
         break;
     default:
         m_report = { 0 };

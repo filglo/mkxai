@@ -15,7 +15,8 @@ namespace Keycodes
             DOWN = 5,
             LEFT = 6,
             RIGHT = 7,
-            UP = 8
+            UP = 8,
+            SELECT = 20
         };
     }
 

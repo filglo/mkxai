@@ -9,7 +9,7 @@ ImageProcessor::ImageProcessor()
     , m_healthUpdated( false )
     , m_frame( 720, 1280, CV_8UC3 )
 {
-    m_pos.resize( 4 );
+    m_pos.resize( 4, 0 );
 }
 
 void ImageProcessor::UpdateHealthValues()
@@ -51,24 +51,18 @@ void ImageProcessor::UpdatePosition()
 {
     if( m_positionUpdated )
         return;
-    std::stringstream ss;
-    if( m_frame.channels() == 4 )
+    auto boxes = GetBBoxes();
+    auto output = std::vector<float>( 4 );
+    if( boxes[0][0] != -1.f )
     {
-        cv::cvtColor( m_frame, m_frame, CV_RGBA2RGB );
+        m_pos[0] = (boxes[0][1] + boxes[0][3]) / 2;
+        m_pos[1] = (boxes[0][0] + boxes[0][2]) / 2;
     }
-    if( m_frame.rows != 720 || m_frame.cols != 1280 || m_frame.channels() != 3 || m_frame.depth() != CV_8U )
+    if( boxes[1][0] != -1.f )
     {
-        ss << m_frame.rows << " " << m_frame.cols << " " << m_frame.channels() << " " << m_frame.depth() << std::endl;
-        throw std::logic_error( "Invalid mat size\n" + ss.str() );
+        m_pos[2] = (boxes[1][1] + boxes[1][3]) / 2;
+        m_pos[3] = (boxes[1][0] + boxes[1][2]) / 2;
     }
-    int a = 0;// = m_network.Predict( m_frame );
-    m_EvalNetwork( a, m_frame );
-    auto output = std::vector<float>( 4, 0.5 );
-    for( int i = 0; i < m_pos.size(); ++i )
-    {
-        m_pos[i] = output[i];
-    }
-    m_pos[0] = a;
     m_positionUpdated = true;
 }
 
@@ -84,4 +78,62 @@ void ImageProcessor::UpdateState()
     }
     */
     m_stateUpdated = true;
+}
+
+void ImageProcessor::PreprocessFrame()
+{
+    std::stringstream ss;
+    if( m_frame.channels() == 4 )
+    {
+        cv::cvtColor( m_frame, m_frame, CV_RGBA2RGB );
+    }
+    if( m_frame.rows != 720 || m_frame.cols != 1280 || m_frame.channels() != 3 || m_frame.depth() != CV_8U )
+    {
+        ss << m_frame.rows << " " << m_frame.cols << " " << m_frame.channels() << " " << m_frame.depth() << std::endl;
+        throw std::logic_error( "Invalid mat size\n" + ss.str() );
+    }
+}
+
+std::vector<std::vector<float>> ImageProcessor::GetBBoxes()
+{
+    PreprocessFrame();
+    int detections;
+    NpyArrayWrapper boxes;
+    NpyArrayWrapper scores;
+    NpyArrayWrapper classes;
+    // TODO: catch exceptions
+    m_EvalNetwork( detections, boxes, scores, classes, m_frame );
+    int p1Idx = -1;
+    int p2Idx = -1;
+    for( int i = 0; i < detections; ++i )
+    {
+        if( p1Idx < 0 && classes.Get( i ) == 1 )
+            p1Idx = i;
+        if( p2Idx < 0 && classes.Get( i ) == 2 )
+            p2Idx = i;
+        if( p2Idx > 0 && p1Idx > 0 )
+            break;
+    }
+    auto convertBox = []( NpyArrayWrapper& boxes, NpyArrayWrapper& scores, int idx, std::vector<float>& bb )
+    {
+        if( boxes.GetDims() == 2 && boxes.GetShape( 1 ) == 4 && scores.Get( idx ) > 0.75 )
+        {
+            for( int i = 0; i < 4; i++ )
+            {
+                bb.push_back( boxes.Get( idx, i ) );
+            }
+        }
+        else
+        {
+            for( int i = 0; i < 4; i++ )
+            {
+                bb.push_back( static_cast<float>(-1) );
+            }
+        }
+    };
+    std::vector<float> p1bb;
+    std::vector<float> p2bb;
+    convertBox( boxes, scores, p1Idx, p1bb );
+    convertBox( boxes, scores, p2Idx, p2bb );
+    return std::vector<std::vector<float>>( { p1bb, p2bb } );
 }

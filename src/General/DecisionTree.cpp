@@ -48,7 +48,7 @@ int DecisionTree::Step()
 }
 
 // rewards should have linear decay in time ( faster reward = better )
-// the decay should be fair to all lengths of branches
+// branches shouldn't be too short or too long
 void DecisionTree::Playout( double reward )
 {
     Backpropagate( m_currentNode, reward );
@@ -111,7 +111,7 @@ int DecisionTree::DecideNextMove( const Node* node ) const
             return moves[RNG::g_rng.GetUInt64( 0, moves.size() - 1 )];
         }
         // Choose next node according to UCB1 formula
-        double c = 0.25;
+        double c = 0.01; // 0.25
         auto it = std::max_element( node->children.begin(), node->children.end(),
             [&]( const std::pair<int, Node>& s1, const std::pair<int, Node>& s2 )
         {

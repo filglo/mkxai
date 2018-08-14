@@ -59,7 +59,19 @@ def DetectObjects(image_np, sess, detection_graph):
         [boxes, scores, classes, num_detections],
         feed_dict={image_tensor: image_np_expanded})
 
-    return (boxes, scores, classes, num_detections)
+    # 0 - no error
+    # 1 - one of the objects is not an array
+    # 2 - invalid array dimensions
+    # 4 - no detections
+    errorCode = 0.0
+    if boxes[0] is None or scores[0] is None or classes[0] is None or num_detections[0] is None:
+        errorCode = 1.0
+    elif len(boxes[0].shape) != 2 or len(scores[0].shape) != 1 or len(classes[0].shape) != 1:
+        errorCode = 2.0
+    elif num_detections[0] == 0:
+        errorCode = 4.0
+
+    return (boxes[0], scores[0], classes[0], num_detections[0], errorCode)
 
 # Creating session
 gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.2)
@@ -79,7 +91,7 @@ def Eval(image):
     (im_height, im_width, _) = image.shape
     image_np = image.reshape((im_height, im_width, 3)).astype(np.uint8)
     output_dict = DetectObjects(image_np, sess, detection_graph)
-    return len(output_dict)
+    return output_dict
 
 def Time():
     image = cv2.imread("D:/Pobrane/models-master/research/object_detection/test_images/1.jpg", cv2.IMREAD_COLOR )
@@ -90,10 +102,14 @@ def Time():
         if( x % 100 == 0 ):
             print( x/10, "%" )
         DetectObjects(image, sess, detection_graph)
-    print("Time per evaluation: ", (timer() - start) / evals )
+    print("Time per evaluation: ", (timer() - start) / evals)
 
 # Close the session when finished
 def Exit():
     if( not sess._closed ):
         sess.close()
 
+#image = cv2.imread("D:/Pobrane/models-master/research/object_detection/test_images/1.jpg", cv2.IMREAD_COLOR )
+#image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+#ret = Eval(image)
+#print( "A1 -2d: ", ret[0][0].dtype, "A2 - 1d: ", ret[1][0].dtype, "A3 - 1d: ", ret[2][0].dtype, "A4 - float32: ", ret[3][0] )

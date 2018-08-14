@@ -14,7 +14,7 @@ StateAttack::StateAttack( Player& owner, StateMachine<Player>& stateMachine )
         Keycodes::GPKEY::DOWN,
         Keycodes::GPKEY::LEFT,
         Keycodes::GPKEY::RIGHT } )
-    , m_tree( m_moves, 5 )
+    , m_tree( m_moves, 9 )
     , m_actionDelay( 0.35 )
     , m_hasFinished( true )
 {
@@ -40,8 +40,9 @@ void StateAttack::Update( std::chrono::duration<double> diff )
     m_timer += diff;
     double distance = 0.0;
     m_owner.m_GetDistance( distance );
-    if( std::abs( distance ) > 0.5 && m_hasFinished )
+    if( std::abs( distance ) > 0.2 && m_hasFinished && false )
     {
+        // disable state switching for testing
         m_stateMachine.SetState( StateMachine<Player>::STATE::APPROACH );
         return;
     }
@@ -49,6 +50,7 @@ void StateAttack::Update( std::chrono::duration<double> diff )
     if( m_timer >= m_actionDelay )
     {
         m_timer -= m_actionDelay;
+        // finish immediately vs wait for step update?
         m_owner.m_SendInput( m_tree.Step() );
         if( m_tree.HasFinished() )
         {
@@ -60,10 +62,12 @@ void StateAttack::Update( std::chrono::duration<double> diff )
             {
                 enemyHPDiff = newEnemyHP - 1.0;
             }
-            m_tree.Playout( playerHPDiff - enemyHPDiff );
+            //m_tree.Playout( playerHPDiff - enemyHPDiff );
+            m_tree.Playout( -enemyHPDiff );
             m_playerHP = newPlayerHP;
             m_enemyHP = newEnemyHP;
             m_hasFinished = true;
+            m_owner.m_SendInput( Keycodes::GPKEY::SELECT );
         }
     }
 }

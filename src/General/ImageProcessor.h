@@ -3,9 +3,9 @@
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include "NeuralNetwork.h"
 #include "Event.h"
 #include "State.h"
+#include "PythonWrapper.h"
 
 class ImageProcessor
 {
@@ -16,14 +16,16 @@ public:
     void GetHealthValues( double& player, double& enemy ) { UpdateHealthValues(); player = m_playerHP; enemy = m_enemyHP; }
     void GetSuggestedState( StateMachine<Player>::STATE& state ) { UpdateState(); state = m_suggestedState; }
     void Update( const cv::Mat& input );
+    std::vector<std::vector<float>> GetBBoxes();
 
-    Event<int&, const cv::Mat&> m_EvalNetwork;
+    Event<int&, NpyArrayWrapper&, NpyArrayWrapper&, NpyArrayWrapper&, const cv::Mat&> m_EvalNetwork;
 
 private:
     double ProcessHealthBar( const cv::Mat& input );
     void UpdateHealthValues();
     void UpdatePosition();
     void UpdateState();
+    void PreprocessFrame();
 
     double m_playerHP;
     double m_enemyHP;
@@ -31,7 +33,6 @@ private:
     StateMachine<Player>::STATE m_suggestedState;
     cv::Mat m_frame;
     bool m_healthUpdated, m_stateUpdated, m_positionUpdated;
-    NeuralNetwork m_network;
 };
 
 #endif // !IMAGEPROCESSOR_H

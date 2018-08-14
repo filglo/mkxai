@@ -7,6 +7,7 @@
 Application::Application()
     try : m_screenCapture( ScreenCapture( 1280, 720 ) )
     , m_ioGamepad()
+    , m_pyWrapper()
     , m_pause( true )
     , m_timeCount( 0 )
     , m_updateCount( 0 )
@@ -18,9 +19,6 @@ Application::Application()
     m_dispatcher.connect( &m_imageProcessor, &ImageProcessor::GetDistance, m_player.m_GetDistance );
     m_dispatcher.connect( &m_imageProcessor, &ImageProcessor::GetSuggestedState, m_player.m_GetSuggestedState );
     m_dispatcher.connect( &m_pyWrapper, &PythonWrapper::Eval, m_imageProcessor.m_EvalNetwork );
-
-    posA.resize( 2 );
-    posB.resize( 2 );
 }
 catch( std::exception& e )
 {
@@ -122,8 +120,14 @@ void Application::Render()
 {
     #if RENDER_WINDOW
         // Displaying the results through Mat drops fps -- waitKey is slow
-        cv::circle( m_matBitmap, cv::Point( posA[0] * m_matBitmap.cols, posA[1] * m_matBitmap.rows ), 20, cv::Scalar( 0, 0, 255 ), 5 );
-        cv::circle( m_matBitmap, cv::Point( posB[0] * m_matBitmap.cols, posB[1] * m_matBitmap.rows ), 20, cv::Scalar( 0, 0, 255 ), 5 );
+        auto bboxes = m_imageProcessor.GetBBoxes();
+        auto w = m_matBitmap.cols;
+        auto h = m_matBitmap.rows;
+        if( bboxes[0].size() == bboxes[1].size() && bboxes[0].size() == 4 )
+        {
+            cv::rectangle( m_matBitmap, cv::Rect( bboxes[0][1]*w, bboxes[0][0]*h, (bboxes[0][3]- bboxes[0][1])*w, (bboxes[0][2]-bboxes[0][0])*h ), cv::Scalar( 0, 0, 255 ), 5 );
+            cv::rectangle( m_matBitmap, cv::Rect( bboxes[1][1]*w, bboxes[1][0]*h, (bboxes[1][3] - bboxes[1][1])*w, (bboxes[1][2] - bboxes[1][0])*h ), cv::Scalar( 0, 255, 255 ), 5 );
+        }
         cv::imshow( "MKX AI - Debug", m_matBitmap );
         cv::waitKey( 1 );
     #endif
@@ -138,11 +142,7 @@ void Application::Render()
         std::cout << "Current State: " << m_player.GetState() << std::endl;
         double distance;
         m_imageProcessor.GetDistance( distance );
-        //posA[0] = pos[0];
-        //posA[1] = pos[1];
-        //posB[0] = pos[2];
-        //posB[1] = pos[3];
-        std::cout << "Distance: " << /*Utility::Distance( posA, posB )*/ distance << std::endl;
+        std::cout << "Distance: " << distance << std::endl;
         m_updateCount = 0;
         // hack for long updates
         if( m_timeCount > std::chrono::duration<double>( 2 * 2 ) )

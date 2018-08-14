@@ -6,7 +6,7 @@ PythonWrapper::PythonWrapper()
 
     // Initialize once
     Py_Initialize();
-    pName = PyUnicode_DecodeFSDefault( "../../python/tfDetection" );
+    pName = PyUnicode_DecodeFSDefault( "tfDetection" );
     /* Error checking of pName left out */
 
     m_pModule = PyImport_Import( pName );
@@ -42,6 +42,21 @@ PythonWrapper::PyTuple::~PyTuple()
     }
 }
 
+std::vector<PyObject*> PythonWrapper::PyTuple::Unpack( PyObject* tuple )
+{
+    if( tuple != nullptr && PyTuple_Check( tuple ) )
+    {
+        std::vector<PyObject*> unpackedTuple;
+        for( int i = 0; i < PyTuple_Size( tuple ); ++i )
+        {
+            unpackedTuple.push_back( PyTuple_GetItem( tuple, i ) );
+            Py_INCREF( unpackedTuple.back() );
+        }
+        return unpackedTuple;
+    }
+    return std::vector<PyObject*>();
+}
+
 void PythonWrapper::PyTuple::Pack( PyObject* element )
 {
     PyTuple_SetItem( m_tuple, m_index, element );
@@ -66,7 +81,7 @@ template<typename... Args> PyObject* PythonWrapper::Call( const std::string& nam
             pValue = PyObject_CallObject( pFunc, PyTuple( args... ) );
             if( pValue != NULL )
             {
-                Py_DECREF( pValue );
+                //Py_DECREF( pValue );
             }
             else
             {
@@ -94,62 +109,17 @@ template<typename... Args> PyObject* PythonWrapper::Call( const std::string& nam
     }
 }
 
-//PyObject* PythonWrapper::PackTuple( const std::vector<PyObject*> args = std::vector<PyObject*>() ) const
-//{
-//    PyObject* pArgs = PyTuple_New( args.size() );
-//    for( int i = 0; i < args.size(); ++i )
-//    {
-//        PyTuple_SetItem( pArgs, i, args[i] );
-//    }
-//    return pArgs;
-//}
-
-//
-//PyObject* PythonWrapper::Call( const std::string& name, std::vector<PyObject*> args = std::vector<PyObject*>() ) const
-//{
-//    PyObject *pFunc, *pValue, *pArgs;
-//    if( m_pModule != NULL )
-//    {
-//        pFunc = PyObject_GetAttrString( m_pModule, name.c_str() );
-//        if( pFunc && PyCallable_Check( pFunc ) )
-//        {
-//            pArgs = PackTuple( args );
-//            pValue = PyObject_CallObject( pFunc, pArgs );
-//            Py_DECREF( pArgs );
-//            if( pValue != NULL )
-//            {
-//                Py_DECREF( pValue );
-//            }
-//            else
-//            {
-//                Py_DECREF( pFunc );
-//                PyErr_Print();
-//                throw std::runtime_error( "Call failed (NULL return value): " + name + "\n" );
-//                return nullptr;
-//            }
-//            Py_XDECREF( pFunc );
-//        }
-//        else
-//        {
-//            if( PyErr_Occurred() )
-//                PyErr_Print();
-//            Py_XDECREF( pFunc );
-//            throw std::runtime_error( "Call failed (function not callable): " + name + "\n" );
-//        }
-//        return pValue;
-//    }
-//    else
-//    {
-//        PyErr_Print();
-//        throw std::runtime_error( "Python module not loaded\n" );
-//        return nullptr;
-//    }
-//}
-
-void PythonWrapper::Eval( int& out, const cv::Mat& mat )
+void PythonWrapper::Eval( int& detections, NpyArrayWrapper& boxes, NpyArrayWrapper& scores, NpyArrayWrapper& classes, const cv::Mat& mat )
 {
     PyObject* pValue = Call( "Eval", MatToPyObject( mat ) );
-    out = PyLong_AsLong( pValue );
+    auto tuple = PyTuple::Unpack( pValue );
+    boxes = NpyArrayWrapper( tuple[0] );
+    scores = NpyArrayWrapper( tuple[1] );
+    classes = NpyArrayWrapper( tuple[2] );
+    detections = (int)PyFloat_AsDouble( tuple[3] );
+    int errorCode = (int)PyFloat_AsDouble( tuple[4] );
+    if( errorCode != 0 )
+        throw std::runtime_error( "Python error code: " + std::to_string( errorCode ) + "\n" );
 }
 
 PyObject* PythonWrapper::MatToPyObject( const cv::Mat& mat ) const
@@ -166,4 +136,66 @@ int PythonWrapper::ImportModules()
         import_array();
     }
     return 0;
+}
+
+NpyArrayWrapper::NpyArrayWrapper()
+    : m_data( nullptr )
+    , m_dim( -1 )
+    , m_shape( nullptr )
+{}
+
+NpyArrayWrapper::NpyArrayWrapper( PyObject * object )
+    : m_data( nullptr )
+    , m_dim( -1 )
+    , m_shape( nullptr )
+{
+    if( object )
+    {
+        if( PyArray_Check( object ) )
+        {
+            PyArrayObject* npyArray = reinterpret_cast<PyArrayObject*>(object);
+            m_dim = PyArray_NDIM( npyArray );
+            m_shape = PyArray_SHAPE( npyArray );
+            m_data = static_cast<float*>(PyArray_DATA( npyArray ));
+            if( !PyArray_CHKFLAGS( npyArray, NPY_ARRAY_CARRAY_RO ) )
+            {
+                throw std::runtime_error( "Numpy array does not behave\n" );
+            }
+        }
+        else
+        {
+            throw std::runtime_error( "PyObject is not Numpy array\n" );
+        }
+    }
+    else
+    {
+        throw std::runtime_error( "Not an object - error\n" );
+    }
+}
+
+float NpyArrayWrapper::Get( int idx ) const
+{
+    if( m_dim != 1 )
+        throw std::logic_error( "Invalid array size\n" );
+    if( idx < 0 || idx >= m_shape[0] )
+        throw std::logic_error( "Invalid array index\n" );
+    return m_data[idx];
+}
+
+float NpyArrayWrapper::Get( int idx, int idx2 ) const
+{
+    if( m_dim != 2 )
+        throw std::logic_error( "Invalid array size\n" );
+    if( idx < 0 || idx2 < 0 || idx >= m_shape[0] || idx2 >= m_shape[1] )
+        throw std::logic_error( "Invalid array index\n" );
+    return m_data[idx * m_shape[1] + idx2];
+}
+
+float NpyArrayWrapper::Get( int idx, int idx2, int idx3 ) const
+{
+    if( m_dim != 3 )
+        throw std::logic_error( "Invalid array size\n" );
+    if( idx < 0 || idx2 < 0 || idx3 < 0 || idx >= m_shape[0] || idx2 >= m_shape[1] || idx3 >= m_shape[2] )
+        throw std::logic_error( "Invalid array index\n" );
+    return m_data[(idx * m_shape[1] + idx2) * m_shape[2] + idx3];
 }

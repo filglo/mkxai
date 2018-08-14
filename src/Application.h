@@ -41,11 +41,6 @@ private:
     std::chrono::duration<double> m_timeCount;
     int m_updateCount;
     bool m_pause;
-
-
-    // shouldnt be here
-    std::vector<double> posA;
-    std::vector<double> posB;
 };
 
 #endif // !APPLICATION_H
