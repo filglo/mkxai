@@ -35,9 +35,6 @@ public:
         m_data = other.m_data;
         m_dim = other.m_dim;
         m_shape = other.m_shape;
-        // move assignment - how to use
-        //*this = other;
-        //throw std::logic_error( "Code mistake\n" );
         return *this;
     }
     float Get( int idx ) const;

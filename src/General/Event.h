@@ -4,8 +4,6 @@
 #include <vector>
 #include <algorithm>
 
-// this needs cleanup
-
 template<class... Args> class Event;
 
 class BaseDispatcher

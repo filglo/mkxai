@@ -8,11 +8,6 @@ import tensorflow as tf
 import cv2
 from timeit import default_timer as timer
 
-
-# imports for object_detection
-sys.path.append('D:/Pobrane/models-master/research/')
-sys.path.append('D:/Pobrane/models-master/research/slim/')
-
 if tf.__version__ < '1.4.0':
   raise ImportError('Please upgrade your tensorflow installation to v1.4.* or later!')
 
@@ -23,15 +18,9 @@ if tf.__version__ < '1.4.0':
 from object_detection.utils import label_map_util
 
 # ## Variables
-# What model to download.
-MODEL_NAME = 'D:/Pobrane/models-master/research/object_detection/mkx_inference_graph'
-
-# Path to frozen detection graph. This is the actual model that is used for the object detection.
+MODEL_NAME = 'model'
 PATH_TO_CKPT = MODEL_NAME + '/frozen_inference_graph.pb'
-
-# List of the strings that is used to add correct label for each box.
-PATH_TO_LABELS = 'D:/Pobrane/models-master/research/object_detection/data/mkx_label_map.pbtxt'
-
+PATH_TO_LABELS = '/mkx_label_map.pbtxt'
 NUM_CLASSES = 2
 
 # ## Loading label map
@@ -94,7 +83,7 @@ def Eval(image):
     return output_dict
 
 def Time():
-    image = cv2.imread("D:/Pobrane/models-master/research/object_detection/test_images/1.jpg", cv2.IMREAD_COLOR )
+    image = cv2.imread("/test_images/1.jpg", cv2.IMREAD_COLOR )
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     evals = 1000
     start = timer()
@@ -108,8 +97,3 @@ def Time():
 def Exit():
     if( not sess._closed ):
         sess.close()
-
-#image = cv2.imread("D:/Pobrane/models-master/research/object_detection/test_images/1.jpg", cv2.IMREAD_COLOR )
-#image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-#ret = Eval(image)
-#print( "A1 -2d: ", ret[0][0].dtype, "A2 - 1d: ", ret[1][0].dtype, "A3 - 1d: ", ret[2][0].dtype, "A4 - float32: ", ret[3][0] )

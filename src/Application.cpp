@@ -159,7 +159,7 @@ void Application::Render()
 void Application::SaveFrame()
 {
     static int imgNum = 0;
-    auto path = "D:/repos/NNP/NNProject/imageData/else/";
+    auto path = "$(ProjectDir)/imageData/else/";
     cv::imwrite( std::string( path ) + std::to_string( imgNum ) + std::string( ".bmp" ), m_matBitmap );
     imgNum++;
 }

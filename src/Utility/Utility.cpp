@@ -7,12 +7,6 @@ namespace Utility
         return 1.0 / ( 1.0 + exp( -x ) );
     }
 
-    double SigmoidDerivative( double x )
-    {
-        double s = SigmoidFunction( x );
-        return s * ( 1.0 - s );
-    }
-
     double MSE( const std::vector<double>& outputs, const std::vector<double>& values )
     {
         double sum = 0.0;

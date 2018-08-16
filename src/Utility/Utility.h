@@ -6,7 +6,6 @@
 namespace Utility
 {
     double SigmoidFunction( double value );
-    double SigmoidDerivative( double value );
     double MSE( const std::vector<double>& outputs, const std::vector<double>& values );
     template<typename T, typename U = std::allocator<T>> double Distance( const std::vector<T,U>& outputs, const std::vector<T,U>& values )
     {
