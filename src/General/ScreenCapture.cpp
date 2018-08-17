@@ -3,10 +3,18 @@
 #include <stdexcept>
 
 ScreenCapture::ScreenCapture( unsigned int frameWidth, unsigned int frameHeight )
-{
-    m_imageWidth = frameWidth;
-    m_imageHeight = frameHeight;
+    : m_imageWidth( frameWidth )
+    , m_imageHeight( frameHeight )
+{}
 
+ScreenCaptureDummy::ScreenCaptureDummy( unsigned int frameWidth, unsigned int frameHeight )
+    : ScreenCapture( frameWidth, frameHeight )
+    , m_matBitmap( frameHeight, frameWidth, CV_8UC4)
+{}
+
+ScreenCaptureWindows::ScreenCaptureWindows( unsigned int frameWidth, unsigned int frameHeight )
+    : ScreenCapture( frameWidth, frameHeight )
+{
     //Screen capture buffer
     RECT screenRect;
     m_hWnd = ::FindWindow(NULL, "MK10");
@@ -36,7 +44,7 @@ ScreenCapture::ScreenCapture( unsigned int frameWidth, unsigned int frameHeight 
     m_info.bmiHeader.biSizeImage = 0;
 }
 
-ScreenCapture::~ScreenCapture()
+ScreenCaptureWindows::~ScreenCaptureWindows()
 {
     free( m_pixelData );
     ReleaseDC( m_hWnd, m_hWindowDC );
@@ -44,7 +52,7 @@ ScreenCapture::~ScreenCapture()
     DeleteObject( m_hCaptureBitmap );
 }
 
-void ScreenCapture::Capture()
+void ScreenCaptureWindows::Capture()
 {
     StretchBlt( m_hCaptureDC, 0, 0, m_imageWidth, m_imageHeight, m_hWindowDC, 0, 0, m_windowWidth, m_windowHeight, SRCCOPY );
     GetDIBits( m_hCaptureDC, m_hCaptureBitmap, 0, m_imageHeight, m_pixelData, (BITMAPINFO*)&m_info, DIB_RGB_COLORS );

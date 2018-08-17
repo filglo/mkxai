@@ -27,7 +27,11 @@ private:
     void SaveFrame();
 
     Dispatcher m_dispatcher;
-    ScreenCapture m_screenCapture;
+#if MOCK_GAME_WINDOW
+    ScreenCaptureDummy m_screenCapture;
+#else
+    ScreenCaptureWindows m_screenCapture;
+#endif
     IOKeyboard m_ioKeyboard;
 #if MOCK_GAMEPAD_IO
     IODummyInterface m_ioGamepad;

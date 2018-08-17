@@ -5,7 +5,7 @@
 #include "Keycodes.h"
 
 Application::Application()
-    try : m_screenCapture( ScreenCapture( 1280, 720 ) )
+    try : m_screenCapture( 1280, 720 )
     , m_ioGamepad()
     , m_pyWrapper()
     , m_pause( true )
@@ -23,6 +23,7 @@ Application::Application()
 catch( std::exception& e )
 {
     OutputDebugString( e.what() );
+    throw;
 }
 
 Application::~Application()
