@@ -4,6 +4,8 @@
 #include <vector>
 #include <algorithm>
 
+// Note: don't delete event during callback
+
 template<class... Args> class Event;
 
 class BaseDispatcher
@@ -19,12 +21,12 @@ protected:
 
     friend class Event<Args...>;
 
-    void add( Event<Args...> *s ) { v.push_back( s ); }
-    void remove( Event<Args...> *s ) { v.erase( std::remove( v.begin(), v.end(), s ), v.end() ); }
+    void add( Event<Args...> *s ) { v = s; }
+    void remove( Event<Args...> *s ) { v = nullptr; }
 
     virtual void call( Args... args ) = 0;
 
-    std::vector<Event<Args...>*> v;
+    Event<Args...>* v;
 };
 
 template<class T, class... Args> class ConcreteDispatcher : public AbstractDispatcher<Args...>
@@ -62,7 +64,7 @@ private:
 
 template<class... Args> AbstractDispatcher<Args...>::~AbstractDispatcher()
 {
-    for( auto i : v ) i->disconnect( *this );
+    if( v ) v->disconnect( *this );
 }
 
 template<class T, class... Args> ConcreteDispatcher<T, Args...>::ConcreteDispatcher( T *t, void(T::*f)(Args...), Event<Args...> &s ) : t( t ), f( f )
