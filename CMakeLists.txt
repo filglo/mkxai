@@ -20,8 +20,16 @@ file(
     "${_src_root_path}/*.h*"
 )
 
-include_directories(${CMAKE_SOURCE_DIR}/src/General ${CMAKE_SOURCE_DIR}/src/Player ${CMAKE_SOURCE_DIR}/src/Utility D:/Anaconda/include ${CMAKE_SOURCE_DIR}/contrib D:/repos/vigem/ViGEmUM D:/repos/vigem/Common $ENV{OPENCV_DIR}/../../include D:/Anaconda/Lib/site-packages/numpy/core/include/numpy)
-link_directories(D:/Anaconda/pkgs/python-3.5.2-0/libs D:/repos/vigem/x64 $ENV{OPENCV_DIR}/lib )
+# Set include and link directories variables
+set(PYTHON_INCLUDE "D:/Anaconda/include")
+set(VIGEM_INCLUDE "D:/repos/vigem/ViGEmUM")
+set(VIGEM_COMMON_INCLUDE "D:/repos/vigem/Common")
+set(NUMPY_INCLUDE "D:/Anaconda/Lib/site-packages/numpy/core/include/numpy")
+set(PYTHON_LIBS "D:/Anaconda/pkgs/python-3.5.2-0/libs")
+set(VIGEM_LIBS "D:/repos/vigem/x64")
+
+include_directories(${CMAKE_SOURCE_DIR}/src/General ${CMAKE_SOURCE_DIR}/src/Player ${CMAKE_SOURCE_DIR}/src/Utility ${PYTHON_INCLUDE} ${CMAKE_SOURCE_DIR}/contrib ${VIGEM_INCLUDE} ${VIGEM_COMMON_INCLUDE} $ENV{OPENCV_DIR}/../../include ${NUMPY_INCLUDE})
+link_directories(${PYTHON_LIBS} ${VIGEM_LIBS} $ENV{OPENCV_DIR}/lib )
 
 add_executable(Engine ${_source_list})
 

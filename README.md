@@ -8,8 +8,9 @@ Visual Studio 2017
 CMake 3.10
 
 ## Build instructions:
-place ViGEmUM.dll in bin/Release and bin/Debug
+set python and vigem include paths in CMakeLists.txt
 run build.cmd
+place ViGEmUM.dll in bin/Release and bin/Debug
 compile resulting visual studio project
 
 ## Goal:
